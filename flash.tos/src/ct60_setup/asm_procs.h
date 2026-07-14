@@ -1,5 +1,5 @@
-/* TOS 4.04 boot version for for the CT60 board
-*  Didier Mequignon 2003 May, e-mail: aniplay@wanadoo.fr
+/* TOS 4.04 Xbios for the CT60 board
+*  Didier Mequignon 2002-2005, e-mail: aniplay@wanadoo.fr
 *
 *  This library is free software; you can redistribute it and/or
 *  modify it under the terms of the GNU Lesser General Public
@@ -16,12 +16,12 @@
 *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "main.h"
+#ifndef	_ASMPROCS_H
+#define	_ASMPROCS_H
 
-	.text
+int ct60_cpu_read_pcr();
+unsigned long measure_cpu_frequency_asm();
+void start_diag_asm();
+unsigned long get_text_max();
 
-	.align	2
-	
-	.short VERSION
-
-	.align	4
+#endif

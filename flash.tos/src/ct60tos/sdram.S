@@ -2,6 +2,8 @@
  * 
  * Didier Mequignon 2001-2005, e-mail: aniplay@wanadoo.fr
  *
+ * Daniel Illgen    2019/02: Added CTPCI IDE support
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -28,7 +30,10 @@
 	.globl display_ram_test
 	.globl ct60_read_info_sdram
 	.globl ct60_configure_sdram
+	.globl setup_loader
+	.globl versionstring
 
+#include "buildstamp.h"
 #include "main.h"
 #include "ct60.h"
 #include "vars.h"
@@ -139,6 +144,17 @@
 #define _sda_high 0xf0c00000      // write 1 to SDA line (data) 
 #define _sda      0xf0000000      // read from SDA line on the D0 CPU data bus
 #define _sdcnf    0xf2000000      // SDRAM configuration 0xf2xx0000 
+
+#define _nideoff  0xf3000000      // turn off the new IDE on the CTPCI (default)
+#define _nideon   0xf3800000      // turn on the new IDE on the CTPCI
+#define _oideon   0xf8000000      // turn on the old IDE of the motherboard (default)
+#define _oideoff  0xf8800000      // turn off the old IDE of the motherboard
+#define _itf      0xe0000040      // CTPCI IDE Fast Timming
+#define ITF       2               // IDE Fast Timming for 75-100 MHz
+
+#define PLX9054            0x905410B5
+#define PCI_LOCAL_CONFIG   0xE8000000   /* CT60 bus slot - no cache - reserved */
+#define PCIIDR                0x00   /* PCI Configuration ID Register       */
 
 #define  WAIT_US bsr wait_26us  
 
@@ -291,7 +307,6 @@ probe_paged_mmu:
 .ppm_exit:
 	movem.l (SP)+,D1-D4/A0-A2
 	rts
-
 init_sdram:
 
 	movem.l D1-A6,-(SP)
@@ -779,8 +794,6 @@ init_sdram:
 	cmp.b #0x6,D0            // CTRL-LSHIFT
 	beq.s .end_sdram
 	lea _init_mmu_tree,A0
-	add.l #0xE80000,A0
-	sub.l #_ct60tos_half_flash,A0
 	jsr (A0)
 	tst.l D0
 	beq.s .end_sdram
@@ -1205,17 +1218,17 @@ get_cookie:
 	rts
 
 error1:	.asciz "SDRAM not found"
-	.asciz "SDRAM non trouv‚e"
+	.asciz "SDRAM non trouv\202e"
 error2:	.asciz "SDRAM chip density error"
-	.asciz "SDRAM erreur densit‚ puces"
+	.asciz "SDRAM erreur densit\202 puces"
 error3:	.asciz "SDRAM number of banks error" 
 	.asciz "SDRAM erreur nombre de banques" 
 error4:	.asciz "SDRAM density error" 
-	.asciz "SDRAM erreur densit‚" 
+	.asciz "SDRAM erreur densit\202" 
 error5:	.asciz "SDRAM burst length error" 
 	.asciz "SDRAM erreur longueur burst" 
 error6:	.asciz "SDRAM data width error"
-	.asciz "SDRAM erreur largeur donn‚es"
+	.asciz "SDRAM erreur largeur donn\202es"
 error7:	.asciz "SDRAM voltage error"
 	.asciz "SDRAM erreur tension"
 error8:	.asciz "SDRAM type error"
@@ -1225,11 +1238,11 @@ error9:	.asciz "SDRAM refresh rate error"
 error10:	.byte 13,10
 	.asciz "            SDRAM read failure at $"
 	.byte 13,10
-	.asciz "            SDRAM erreur v‚rification en $"
+	.asciz "            SDRAM erreur v\202rification en $"
 error11:	.asciz "CTCM not found"
-	.asciz "CTCM non trouv‚e"
+	.asciz "CTCM non trouv\202e"
 error12:	.asciz "CTCM frequency error"
-	.asciz "CTCM erreur fr‚quence"
+	.asciz "CTCM erreur fr\202quence"
 name1:	.asciz "Eiffel"
 name2:	.asciz "boot.log"
 message0:	.byte 0x1B,0x62,0x34,0x41
@@ -1255,11 +1268,11 @@ message3:	.asciz "128"
 message4:	.asciz "256"
 message5:	.asciz "512"
 message6:	.asciz "MB detected"
-	.asciz "Mo d‚tect‚e" 
+	.asciz "Mo d\202tect\202e" 
 message8:	.asciz "68060 Rev."
-	.asciz "68060 R‚v."
+	.asciz "68060 R\202v."
 message9:	.asciz "68EC060 / 68LC060 Rev."
-	.asciz "68EC060 / 68LC060 R‚v."
+	.asciz "68EC060 / 68LC060 R\202v."
 message10:	.asciz "unknown CPU "
 	.asciz "CPU inconnu"
 message11:	.asciz " Mask D00W/D11W" // revision 0
@@ -1270,24 +1283,25 @@ message13:	.asciz " Mask F84W"      // revision 2
 	.asciz " Masque F84W"
 message14:	.asciz " Mask E41J"      // revision 6
 	.asciz " Masque E41J" 
-message15:	.byte 27 
-	.ascii "p Boot v"
+versionstring:
+	.byte	message16-message15
+message15:	.byte 27
+	.ascii "p "
+	.ascii "Boot v"
 	.byte ((VERSION/256) & 0xF) + 0x30
 	.ascii "."
 	.byte ((VERSION/16) & 0xF) + 0x30
 	.byte (VERSION & 0xF) + 0x30
-	.asciz "e "
-message15b:	
-	.ascii "2026 June "
-	.byte 27
-	.ascii "q"
-	.byte 13,10,0
-	.ascii "Juin 2026 "
+	.ascii " "
+	.ascii BUILDDATE
+//	.ascii BUILDSTAMP
+//	.ascii " PRERELEASE"
+	.ascii " "
 	.byte 27
 	.ascii "q"
 	.byte 13,10,0
 message16:	.byte 13,10
-	.asciz "Initialization SDRAM"
+	.asciz "Initializing SDRAM"
 	.byte 13,10 
 	.asciz "Initialisation SDRAM" 
 message17:   .ascii "MB/S"
@@ -1308,7 +1322,7 @@ message19:	.byte 13,10,27
 message20:	.byte 13,10
 	.asciz "Byte 2, Memory Type : "
 	.byte 13,10
-	.asciz "Octet 2, Type de m‚moire : "
+	.asciz "Octet 2, Type de m\202moire : "
 message20b:	.asciz " SDRAM"
 message21:	.byte 13,10
 	.asciz "Byte 3, Number of Row Addresses : "
@@ -1325,7 +1339,7 @@ message23:	.byte 13,10
 message24:	.byte 13,10
 	.asciz "Bytes 6-7, Module Data Width : "
 	.byte 13,10
-	.asciz "Octets 6-7, Largeur donn‚es module : "
+	.asciz "Octets 6-7, Largeur donn\202es module : "
 message24b:	.asciz " bits"
 message25:	.byte 13,10
 	.asciz "Byte 8, Voltage Interface Level : "
@@ -1339,7 +1353,7 @@ message26:	.byte 13,10
 message27:	.byte 13,10
 	.asciz "Byte 10, SDRAM Access from Clock : "
 	.byte 13,10
-	.asciz "Octet 10, SDRAM AccŠs de l'horloge : "
+	.asciz "Octet 10, SDRAM Acc\212s de l'horloge : "
 message28:	.byte 13,10
 	.asciz "Byte 11, SDRAM Configuration Type : "
 	.byte 13,10
@@ -1347,7 +1361,7 @@ message28:	.byte 13,10
 message29:	.byte 13,10
 	.asciz "Byte 12, Refresh Rate : "
 	.byte 13,10
-	.asciz "Octet 12, Fr‚quence rafraichissement : "
+	.asciz "Octet 12, Fr\202quence rafraichissement : "
 message30:	.byte 13,10
 	.asciz "Byte 17, Number of Banks : "
 	.byte 13,10
@@ -1355,19 +1369,19 @@ message30:	.byte 13,10
 message31:	.byte 13,10
 	.asciz "Byte 27, Minimum Row Precharge Time : "
 	.byte 13,10
-	.asciz "Octet 27, Temps de pr‚chage mini lignes : "
+	.asciz "Octet 27, Temps de pr\202chage mini lignes : "
 message32:	.byte 13,10
 	.asciz "Byte 28, Minimum Row Active to Active Delay : "
 	.byte 13,10
-	.asciz "Octet 28, D‚lais mini entre activations de lignes : "
+	.asciz "Octet 28, D\202lais mini entre activations de lignes : "
 message33:	.byte 13,10
 	.asciz "Byte 29, Minimum RAS to CAS Delay : "
 	.byte 13,10
-	.asciz "Octet 29, D‚lais mini entre RAS et CAS : "
+	.asciz "Octet 29, D\202lais mini entre RAS et CAS : "
 message34:	.byte 13,10
 	.asciz "Byte 31, Module Bank Density : "
 	.byte 13,10
-	.asciz "Octet 31, Densit‚ banque du module : "
+	.asciz "Octet 31, Densit\202 banque du module : "
 message35:	.byte 13,10
 	.asciz "Bytes 64-71, Module Manufacturers ID : $"
 	.byte 13,10
@@ -1390,13 +1404,13 @@ message42:	.byte 13,10
 	.asciz "IDE  "
 message43:	.asciz " ... "
 message44:	.asciz "no answer"
-	.asciz "pas de r‚ponse"
+	.asciz "pas de r\202ponse"
 message45:	.asciz "error"
 	.asciz "erreur"
 message46:	.asciz "read error"
 	.asciz "erreur lecture"
 message47:	.asciz "no boot found"
-	.asciz "boot non trouv‚"
+	.asciz "boot non trouv\202"
 message48:	.asciz "boot in progress"
 	.asciz "boot en cours"
 message49:	.asciz " -> "
@@ -1406,10 +1420,10 @@ message51:	.byte 13,10
 //	.asciz "            TOS copied to SDRAM (0-1FFF E00000-EEFFFF)"
 	.asciz "            TOS copied to SDRAM"
 	.byte 13,10
-//	.asciz "            TOS copi‚ en SDRAM (0-1FFF E00000-EEFFFF)"
-	.asciz "            TOS copi‚ en SDRAM"
+//	.asciz "            TOS copi\202 en SDRAM (0-1FFF E00000-EEFFFF)"
+	.asciz "            TOS copi\202 en SDRAM"
 message51b:	.asciz "NVRAM unused"
-	.asciz "NVRAM non utilis‚e"
+	.asciz "NVRAM non utilis\202e"
 message52:	.byte 13,10
 	.asciz "Reset"
 message53:	.byte 13,10
@@ -1417,9 +1431,9 @@ message53:	.byte 13,10
 	.byte 13,10
 	.asciz "Octet 18, CAS Latence : "
 message54:	.asciz ", CAS Latency unsupported"
-	.asciz ", CAS Latence non support‚e"
+	.asciz ", CAS Latence non support\202e"
 message55:	.asciz ", Data Width unsupported"
-	.asciz ", Largeur donn‚es non support‚e"
+	.asciz ", Largeur donn\202es non support\202e"
 message56:	.byte 13,10
 	.asciz "Byte 19, CS Latency : " 
 	.byte 13,10
@@ -1431,12 +1445,12 @@ message57:	.byte 13,10
 message58:	.byte 13,10
 	.asciz "Bytes 73-90, Module Part Number : " 
 	.byte 13,10
-	.asciz "Octets 73-90, R‚f‚rence du module : "
+	.asciz "Octets 73-90, R\202f\202rence du module : "
 message59:	.asciz " nS"
 message60:	.asciz " no parity"
-	.asciz " pas de parit‚"
+	.asciz " pas de parit\202"
 message61:	.asciz " parity"
-	.asciz " parit‚"
+	.asciz " parit\202"
 message62:	.asciz " ECC"
 	.asciz " ECC"
 message63:	.asciz "15.625 uS"
@@ -1463,21 +1477,21 @@ message75:	.byte 13,10
 message76:	.byte 13,10
 	.asciz "Keyboard failure"
 	.byte 13,10 
-	.asciz "Pas de r‚ponse du clavier" 
+	.asciz "Pas de r\202ponse du clavier" 
 message77:	.byte 13,10,27
 	.ascii "p Choice of the system : "
 	.byte 27
 	.ascii "q"
 	.byte 13,10,0
 	.byte 13,10,27 
-	.ascii "p Choix du systŠme : "
+	.ascii "p Choix du syst\212me : "
 	.byte 27
 	.ascii "q"
 	.byte 13,10,0
 message78:	.byte 13
 	.asciz "Starting in "
 	.byte 13
-	.asciz "D‚marrage dans "
+	.asciz "D\202marrage dans "
 message79:	.asciz " seconds  "
 	.asciz " secondes  "
 message80:	.asciz " TOS   "
@@ -1486,17 +1500,17 @@ message82:	.asciz " Linux "
 message83:	.asciz " removable"
 	.asciz " amovible"
 message84:	.asciz "no logical unit"
-	.asciz "pas d'unit‚ logique"
+	.asciz "pas d'unit\202 logique"
 message85:	.asciz "not ready"
-	.asciz "pas prˆt"
+	.asciz "pas pr\210t"
 message86:	.asciz "media not present"
-	.asciz "support non pr‚sent"
+	.asciz "support non pr\202sent"
 message87:	.asciz "boot impossible"
 	.asciz "boot impossible"
 message88:	.byte 13,10
-	.asciz " Abnormal asnwer => Reset SCSI..."
+	.asciz " Abnormal answer => Reset SCSI..."
 	.byte 13,10
-	.asciz " R‚ponse anormale => Reset SCSI..."
+	.asciz " R\202ponse anormale => Reset SCSI..."
 message89:	.asciz "MB/S "
 	.asciz "Mo/S "
 message90:	.asciz "boot MSDOS"
@@ -1504,7 +1518,7 @@ message90:	.asciz "boot MSDOS"
 message91:	.byte 13,10
 	.asciz " Found "
 	.byte 13,10
-	.asciz " Trouv‚ "
+	.asciz " Trouv\202 "
 message92:	.byte 13,10
 	.ascii "Boot drive has a BPB invalid!"
 	.byte 13,10,0
@@ -1512,7 +1526,7 @@ message92:	.byte 13,10
 	.ascii "Le lecteur de boot a un BPB invalide !"
 	.byte 13,10,0
 message93:	.asciz " ... is not a TOS binary!"
-	.asciz " ... n'est pas un ex‚cutable TOS !"
+	.asciz " ... n'est pas un ex\202cutable TOS !"
 message94:	.byte 13,10
 	.asciz "Error TOS : "
 	.byte 13,10
@@ -1546,7 +1560,7 @@ message98:	.byte 13,10
 	.byte 13,10	
 	.asciz "Valeur (dec) ? "
 message99:	.asciz " CTCM"
-	
+
 blue:	.byte 0x1B,0x62,0x34,0
 black:	.byte 0x1B,0x62,0x3F,0
 	
@@ -1637,14 +1651,14 @@ list_device_type:
 	.asciz "communication"  // Communication Device
 	.asciz "CompactFlash"
 	
-	.asciz "disque magn‚tique"
-	.asciz "bande magn‚tique"
+	.asciz "disque magn\202tique"
+	.asciz "bande magn\202tique"
 	.asciz "imprimante"
 	.asciz "processeur"
 	.asciz "disque optique"
 	.asciz "CD/DVD"
 	.asciz "scanner"
-	.asciz "m‚moire optique"
+	.asciz "m\202moire optique"
 	.asciz "juke-box"
 	.asciz "communication"
 	.asciz "CompactFlash"
@@ -1652,6 +1666,7 @@ list_device_type:
 	.align 2
 
 boot_drive:
+	jsr	setup_loader
 
 	movem.l D0-A5,-(SP)
 	link A6,#-18
@@ -3497,8 +3512,6 @@ menu_boot:
 	move.l D0,D1
 	move.l #0x5F465055,D0    // _FPU cookie
 	bsr get_cookie
-	add.l #0xE80000,A1
-	sub.l #_ct60tos_half_flash,A1
 	jsr (A1)
 .normal_boot:
 	unlk A6
@@ -4381,8 +4394,6 @@ add_sdram:
 	movem.l D1-D7/A1-A5,-(SP)
 	lea message15(PC),A0     // boot version
 	bsr display_string_single
-	lea message15b(PC),A0
-	bsr display_string
 	clr.l -(SP)
 	move.l #CT60_BOOT_ORDER,-(SP)
 	move.w #CT60_MODE_READ,-(SP)
@@ -4568,6 +4579,7 @@ add_sdram:
 	move.l #0x752019F3,memvalid
 	move.l #0x237698AA,memval2
 	move.l #0x5555AAAA,memval3
+	bsr	CTPCI_Init
 	moveq #3,D0
 	jsr 0xE00BD2
 	move.l hdv_boot,A0
@@ -4578,6 +4590,60 @@ add_sdram:
 	jsr (A0)
 .no_boot:
 	movem.l (SP)+,D1-D7/A1-A5
+	rts
+
+CTPCI_Init:
+	movem.l	D0-D7/A0-A6,-(SP)
+
+	move.l	sp,a2
+	move.l	8,a3
+	move.l	#.berr,8
+	nop
+	moveq	#0,d0
+	tst.l	PCI_LOCAL_CONFIG
+	nop
+	moveq	#1,d0
+.berr:	move.l	a3,8
+	move.l	a2,sp
+	nop
+
+	tst.l	d0
+	beq	.noctpci
+
+	// ctpci setup code
+	bsr	measure_cpu_frequency
+	moveq	#4,D1
+	cmp.l	#750,D0
+	bcs.s	.lower_75mhz
+	moveq	#6,D1
+.lower_75mhz:
+	move.b	D1,0xE0000023	// set CTPCI to 2*512MB instead of 2*1GB
+
+	clr.l 	-(SP)
+	move.l	#CT60_PARAM_CTPCI,-(SP)
+	move.w	#CT60_MODE_READ,-(SP)
+	move.w	#rw_parameter,-(SP)
+	trap	#14
+	lea	12(SP),SP
+	btst	#0,D0
+	beq.s	.normal
+	// swap IDE address
+	clr.l	_oideoff           // turn off the old IDE of the motherboard
+	clr.l	_nideon            // turn on the new IDE on the CTPCI
+	bra.s	.swapdone
+.normal:
+	clr.l	_nideoff
+	clr.l	_oideon
+.swapdone:
+/*
+	lea	msg_pciinit(pc),a0
+	bra.s	.showmsg
+*/
+.noctpci:
+//	lea	msg_nopci(pc),a0
+.showmsg:
+//	bsr	display_string_single
+	movem.l	(SP)+,D0-D7/A0-A6
 	rts
 
 ct60_configure_clock:	// D0.L: frequency, D1: mode

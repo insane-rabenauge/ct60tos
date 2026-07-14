@@ -88,7 +88,7 @@ NFDISTFILES=	\
 		$(NFDISTDIR)/tos404.bin \
 		$(NFDISTDIR)/sparrow.out
 
-all:	 	$(FLASH_BINARY) $(TOS)
+all:	 	buildstamp $(FLASH_BINARY) $(TOS)
 
 bindist:	$(BINARCHIVE)
 $(BINARCHIVE):	$(BINDISTFILES)
@@ -134,3 +134,9 @@ $(OBJDIR)/ct60tos/%.o:	$(SRCDIR)/ct60tos/%.S
 $(OBJDIR)/%.o:	$(SRCDIR)/%.S
 	@mkdir -p $(@D)
 	$(CC) $(INCLUDE) $(CFLAGS) -c $< -o $@
+
+.PHONY: buildstamp
+buildstamp:
+	date +"#define BUILDSTAMP \"%Y%m%d.%H%M\"" > $(INCDIR)/buildstamp.h
+	date +"#define BUILDDATE \"%Y%m%d\"" >> $(INCDIR)/buildstamp.h
+

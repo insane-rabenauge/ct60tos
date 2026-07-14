@@ -91,4 +91,4 @@ end7:
 	.long	end8-begin8
 begin8:
 	jsr	fix_gettime
-end8:	
+end8:
