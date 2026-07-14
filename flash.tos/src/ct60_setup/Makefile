@@ -41,8 +41,6 @@ SOBJECTS = $(SSRCS:.S=.o)
 
 DEPEND = .depend
 
-VERSION = 1.2
-
 all:	$(TARGET)
 
 $(TARGET):	$(COBJECTS) $(SOBJECTS)
@@ -54,7 +52,7 @@ clean:
 
 dist:
 	cd .. ; tar cvzf \
-		ct60_setup-$(VERSION).tar.gz \
+		ct60_setup.tar.gz \
 		ct60_setup/*.c \
 		ct60_setup/*.h \
 		ct60_setup/*.S \

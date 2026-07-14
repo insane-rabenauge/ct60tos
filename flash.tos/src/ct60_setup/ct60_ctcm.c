@@ -147,8 +147,6 @@ int ct60_write_clock(unsigned long frequency,int mode)
 		{
 			offset_def=(long)(error>>11);
 			Super((void *)stack);     /* user mode */
-			if(frequency<(MIN_FREQ_DALLAS+300UL)) /* strap on CLK/2 */
-				frequency<<=1;
 			if(frequency<MIN_FREQ_DALLAS || frequency>MAX_FREQ_DALLAS)
 				return(CT60_CALC_CLOCK_ERROR);
 			/* MUX : PDN0/1 = 0, SEL0 = 1, EN0 = 0, 0M = 1, 1M = 0, DIV1 = 1  */

@@ -70,15 +70,15 @@ static const form_menu_t form_menu_empty={
 };
 
 static const menu_t menu[NUM_MENU_ENTRIES]={
-	{"NVRAM",	&form_menu_nvram, &form_setting_nvram[0]},
+	{"NVRAM     ",	&form_menu_nvram, &form_setting_nvram[0]},
 	{"          ",	&form_menu_empty, NULL},
-	{"CT60",	&form_menu_ct60, NULL},
-	{" CPU",	&form_menu_cpu, &form_setting_cpu[0]},
-	{" SDRAM",	&form_menu_sdram, NULL},
+	{"CT60      ",	&form_menu_ct60, NULL},
+	{" CPU      ",	&form_menu_cpu, &form_setting_cpu[0]},
+	{" SDRAM    ",	&form_menu_sdram, NULL},
 	{"          ",	&form_menu_empty, NULL},
 	{"CT60 BOOT ",	&form_menu_boot, &form_setting_boot[0]},
 	{"          ",	&form_menu_empty, NULL},
-	{"EXIT",	&form_menu_exit, &form_setting_exit[0]}
+	{"EXIT      ",	&form_menu_exit, &form_setting_exit[0]}
 };
 
 static int menu_refresh = 1;
@@ -224,18 +224,18 @@ static void display_banner(void)
 
 	Cconws(CLEAR_DOWN);
 
-	if ((basepage[0x80]!=0)&&(basepage[0x81]==27)) {
+	if ((basepage[0x80]!=0)&&(basepage[0x81]==27)) { // read tos build date from basepage if run from ct60tos
 	  p=s=0;
 	  while (msg1[s]) msg[p++]=msg1[s++];
 	  l=basepage[0x80]-7; // skip escape sequence
 	  for (i=0;i<l;i++) msg[p++]=basepage[0x83+i];
 	  strCopy(msg2,&msg[p]);
 	} else {
-	  strCopy("CT60 Setup v1.2.0",msg);
+	  strCopy("CT60 Setup v1.3.0",msg);
 	}
 
 	CcenterY(msg,0);
-	CcenterY("(C) 2009 Patrice Mandin, 2019 Daniel Illgen",1);
+	CcenterY("(C) 2009 Patrice Mandin, 2019-2026 Daniel Illgen",1);
 }
 
 static void display_menu(void)
@@ -244,19 +244,16 @@ static void display_menu(void)
 
 	vt_setFgColor(COL_MENU_FG);
 	for (i=0; i<FORM_H; i++) {
-		vt_setCursorPos(FORM_X-1,FORM_Y+i);
+		vt_setCursorPos(FORM_X,FORM_Y+i);
 		vt_setBgColor(COL_MENU_BG);
-		Cconws(DEL_BOL);
-
 		if (i<NUM_MENU_ENTRIES) {
-			if (i==menu_row) {
-				vt_setBgColor(COL_MENU_BG_SEL);
-				Cconws(DEL_BOL);
-			}
-
+			if (i==menu_row) vt_setBgColor(COL_MENU_BG_SEL);
 			vt_setCursorPos(0,FORM_Y+i);
 			Cconws(menu[i].name);
-		}
+		} else {
+			vt_setCursorPos(0,FORM_Y+i);
+			Cconws("          ");
+		};
 	}
 }
 

@@ -53,17 +53,14 @@
 #define FORM_FREQ_FRAC (FORM_FREQ_INT+4)
 #define FORM_TEMP (FORM_FREQ+1)
 #define FORM_TEMP_INT 13
-#define FORM_CACHE (FORM_TEMP+1)
-#define FORM_CACHE_POS 13
-#define FORM_RELOAD (FORM_CACHE+1)
+#define FORM_RELOAD (FORM_TEMP+1)
 #define FORM_SAVE (FORM_RELOAD+1)
 
 #define FORM_SETTING_FPU 0
 #define FORM_SETTING_BLIT 1
 #define FORM_SETTING_FREQ 2
-#define FORM_SETTING_CACHE 3
-#define FORM_SETTING_RELOAD 4
-#define FORM_SETTING_SAVE 5
+#define FORM_SETTING_RELOAD 3
+#define FORM_SETTING_SAVE 4
 
 #define CHAR_DEG	"\xf8"
 
@@ -96,13 +93,6 @@ static const char *blitspeed[]={
   	" 8 MHz","16 MHz", NULL
 };
 
-static const char *cachetype[]={
-        "Normal cache      No copyback alert",
-        "Delay cache 5s    No copyback alert",
-        "Normal cache         Copyback alert",
-        "Delay cache 5s       Copyback alert",
-	NULL
-};
 static form_t form_cpu[]={
 	{FORM_TITLE, "CPU", FORM_X+((FORM_W-3)>>1), FORM_Y},
 	{FORM_TEXT, "CPU          -----", FORM_X+2,FORM_Y+2},
@@ -113,9 +103,8 @@ static form_t form_cpu[]={
 	{FORM_TEXT, "Blitter      ------", FORM_X+2,FORM_Y+9},
 	{FORM_TEXT, "Frequency    ---.--- MHz, CTCM/-", FORM_X+2,FORM_Y+11},
 	{FORM_TEXT, "Temperature  --- " CHAR_DEG "C", FORM_X+2,FORM_Y+12},
-	{FORM_TEXT, "Cache Delay  -----------------------------------", FORM_X+2,FORM_Y+14},
-	{FORM_TEXT, "Reload settings", FORM_X+2,FORM_Y+16},
-	{FORM_TEXT, "Save settings", FORM_X+2,FORM_Y+17},
+	{FORM_TEXT, "Reload settings", FORM_X+2,FORM_Y+14},
+	{FORM_TEXT, "Save settings", FORM_X+2,FORM_Y+15},
 	{FORM_END, 0,0,0}
 };
 
@@ -123,9 +112,8 @@ form_setting_t form_setting_cpu[]={
 	{FORM_X+2+FORM_FPU_ON_POS,FORM_Y+3, NULL, SETTING_LIST, 3, onoff},
 	{FORM_X+2+FORM_BLIT_POS,FORM_Y+9, NULL, SETTING_LIST, 6, blitspeed},
 	{FORM_X+2+FORM_FREQ_INT,FORM_Y+11, NULL, SETTING_UPDOWN, 7, updownFreq},	/* Freq */
-	{FORM_X+2+FORM_CACHE_POS,FORM_Y+14,NULL, SETTING_LIST, 36, cachetype},	/* Cache */
-	{FORM_X+2,FORM_Y+16, NULL, SETTING_FUNC, 0, reloadFormCpu},	/* Reload settings */
-	{FORM_X+2,FORM_Y+17, NULL, SETTING_FUNC, 0, saveFormCpu},	/* Save settings */
+	{FORM_X+2,FORM_Y+14, NULL, SETTING_FUNC, 0, reloadFormCpu},	/* Reload settings */
+	{FORM_X+2,FORM_Y+15, NULL, SETTING_FUNC, 0, saveFormCpu},	/* Save settings */
 	{0, 0, NULL, SETTING_END}
 };
 
@@ -143,7 +131,7 @@ const form_menu_t form_menu_cpu={
 
 static unsigned long start_tick, cur_tick;
 static unsigned long frequency = 0, min_freq = 0, max_freq = 0;
-static unsigned long cookie_ct60, cache_delay, cache_delay_load;
+static unsigned long cookie_ct60;
 static unsigned long ct60_cpu_fpu, ct60_cpu_fpu_load;
 static unsigned long ct60_blitter, ct60_blitter_load;
 static char has_ct60, ctcm_div=1;
@@ -176,7 +164,6 @@ void initFormCpu(void)
 	form_setting_cpu[FORM_SETTING_FPU].text = &form_cpu[FORM_FPU].text[FORM_FPU_ON_POS];
 	form_setting_cpu[FORM_SETTING_BLIT].text = &form_cpu[FORM_BLIT].text[FORM_BLIT_POS];
 	form_setting_cpu[FORM_SETTING_FREQ].text = &form_cpu[FORM_FREQ].text[FORM_FREQ_INT];
-	form_setting_cpu[FORM_SETTING_CACHE].text = &form_cpu[FORM_CACHE].text[FORM_CACHE_POS];
 	form_setting_cpu[FORM_SETTING_RELOAD].text = &form_cpu[FORM_RELOAD].text[0];
 	form_setting_cpu[FORM_SETTING_SAVE].text = &form_cpu[FORM_SAVE].text[0];
 	
@@ -295,8 +282,6 @@ static void reloadFormCpu(void)
 		confirmFormCpu(FORM_SETTING_FREQ, confSetting);
 
 		readCT60Settings();
-
-		confirmFormCpu(FORM_SETTING_CACHE, confSetting);
 	}
 }
 
@@ -308,7 +293,6 @@ static void saveFormCpu(void)
 		} else {
 			ct60_rw_parameter(CT60_MODE_WRITE,CT60_CLOCK,(long)frequency);
 		}
-		if (cache_delay!=cache_delay_load)ct60_rw_parameter(CT60_MODE_WRITE,CT60_CACHE_DELAY, cache_delay);
 		if (ct60_cpu_fpu!=ct60_cpu_fpu_load)ct60_rw_parameter(CT60_MODE_WRITE,CT60_CPU_FPU,ct60_cpu_fpu);
 		if (ct60_blitter!=ct60_blitter_load)ct60_rw_parameter(CT60_MODE_WRITE,CT60_BLITTER_SPEED,ct60_blitter);
 	}
@@ -327,34 +311,28 @@ static void confirmFormCpu(int num_setting, conf_setting_u confSetting)
 			format_number(&form_cpu[FORM_FREQ].text[FORM_FREQ_INT],  (frequency/ctcm_div)/1000, 3, '0');
 			format_number(&form_cpu[FORM_FREQ].text[FORM_FREQ_FRAC], (frequency/ctcm_div)%1000, 3, '0');
 			break;
-		case FORM_SETTING_CACHE:
-			cache_delay = confSetting.num_list;
-			break;
 	}
 
 	showCT60Settings();
 	vt_displayForm_idx(form_cpu, FORM_FPU, 1);
 	vt_displayForm_idx(form_cpu, FORM_BLIT, 1);
 	vt_displayForm_idx(form_cpu, FORM_FREQ, 1);
-	vt_displayForm_idx(form_cpu, FORM_CACHE, 1);
 }
 
 static void updownFreq(int direction)
 {
 	switch(direction) {
 		case SETTING_DIR_LEFT:
+			frequency -= 1000L*ctcm_div;
+			break;
 		case SETTING_DIR_DOWN:
 			frequency -= ct60_freq_step;
-			if (frequency < min_freq) {
-				frequency = min_freq;
-			}
 			break;
 		case SETTING_DIR_RIGHT:
+			frequency += 1000L*ctcm_div;
+			break;
 		case SETTING_DIR_UP:
 			frequency += ct60_freq_step;
-			if (frequency>max_freq) {
-				frequency=max_freq;
-			}
 			break;
 		case SETTING_DIR_PRINT:
 			{
@@ -368,6 +346,8 @@ static void updownFreq(int direction)
 			}
 			break;
 	}
+	if (frequency<min_freq) frequency=min_freq;
+	if (frequency>max_freq) frequency=max_freq;
 }
 
 static void readCT60Freq()
@@ -382,14 +362,12 @@ static void readCT60Freq()
 
 static void showCT60Settings()
 {
-	strCopy(cachetype[cache_delay&3], form_setting_cpu[FORM_SETTING_CACHE].text);
 	strCopy(onoff[(ct60_cpu_fpu&1)^1], form_setting_cpu[FORM_SETTING_FPU].text);
 	strCopy(blitspeed[ct60_blitter&1], form_setting_cpu[FORM_SETTING_BLIT].text);
 }
 
 static void readCT60Settings()
 {
-	cache_delay_load=cache_delay=ct60_rw_parameter(CT60_MODE_READ,CT60_CACHE_DELAY,0)&3;
 	ct60_cpu_fpu_load=ct60_cpu_fpu=ct60_rw_parameter(CT60_MODE_READ,CT60_CPU_FPU,0);
 	ct60_blitter_load=ct60_blitter=ct60_rw_parameter(CT60_MODE_READ,CT60_BLITTER_SPEED,0);
 	showCT60Settings();
