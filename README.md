@@ -5,18 +5,7 @@ CT60 boot 1.05 - 20260715 - modified by insane/tSCc
 
 Contact me insane.atari@gmail.com - http://insane.tscc.de
 
-Please read out your ABE+SDR with abesdr.tos BEFORE Flashing a new TOS.
-I've had reports of the ABE+SDR IDs being gone after Flashing.
-If you have an ID of FFFFFFFF your ABE+SDR ID is not programmed.
-This has no negative impact!
-
-If you have an ID which is not listed in abesdr.tos then please contact me!
-
-Use either CT60tosA.bin or CT60tosB.bin if you have problems.
-There shouldn't be any difference to non-SV users.
-For some SV users CT60tosA works, for others CT60tosB.
-
-Check ftp://untergrund.net/users/insane/atari/autoexec.zip for a nice boot menu!
+Check https://github.com/insane-rabenauge/insaneboot for a nice boot menu!
 
 Boot Changelog since v1.03c
 - 201902xx: modified the sources for cross compilation on PC (huge thanks to mikro!)
