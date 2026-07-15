@@ -88,7 +88,7 @@ NFDISTFILES=	\
 		$(NFDISTDIR)/tos404.bin \
 		$(NFDISTDIR)/sparrow.out
 
-all:	 	buildstamp $(FLASH_BINARY) $(TOS)
+all:	 	buildstamp $(TOS)
 
 bindist:	$(BINARCHIVE)
 $(BINARCHIVE):	$(BINDISTFILES)
