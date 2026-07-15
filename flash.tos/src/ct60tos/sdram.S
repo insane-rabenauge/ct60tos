@@ -190,8 +190,8 @@ init_060:
 	lea .no_cartrige(PC),A6
 	jmp 0x00FA0004
 .no_cartrige:
-	move.w #0x20,0xFFFF828C
-	move.w #0x10,0xFFFF8282
+	move.w #0x20,0xFFFF828C	//TODO 01B4, was 0x20 - more sane defaults - but vsync now works - is that good?
+	move.w #0x10,0xFFFF8282	//TODO 01FE, was 0x10 - stop vsync - maybe switch order around? add nops here?
 	or.b #0x21,0xFFFF8007
 	btst #6,0xFFFF8007
 	beq .end_init_060
@@ -4425,12 +4425,25 @@ add_sdram:
 	moveq #10,D0
 	bsr display_char
 .not_infos:
+	link A6,#-12
+	pea -12(A6)              // buffer
+	move.w #12,-(SP)         // size
+	clr.w -(SP)              // start
+	clr.w -(SP)              // read
+	move.w #46,-(SP)         // NVMaccess
+	trap #14
+	lea 12(SP),SP
+	move.b -2(A6),D4         // bootdelay in seconds
+	unlk A6
+
 	move.l #0x01002000,D1    // skip 8K for the supervisor stack
 	move.l ramtop,D0
 	sub.l D1,D0
 	ble .not_sdram
 	move.l D0,-(SP)          // size
 	move.l D1,-(SP)          // start
+	tst.b d4 // bootdelay=0?
+	beq .ram_valid //skip ram clear on boot delay=0
 	cmp.l #0x752019F3,memvalid
 	bne.s .not_valid
 	cmp.l #0x237698AA,memval2
@@ -4438,6 +4451,7 @@ add_sdram:
 	cmp.l #0x5555AAAA,memval3
 	beq .ram_valid
 .not_valid:
+
 	move.l D1,A4
 #ifndef INIT_SDRAM_MOVE16
 	add.l D0,A4              // end

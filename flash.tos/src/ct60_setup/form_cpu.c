@@ -134,7 +134,8 @@ static unsigned long frequency = 0, min_freq = 0, max_freq = 0;
 static unsigned long cookie_ct60;
 static unsigned long ct60_cpu_fpu, ct60_cpu_fpu_load;
 static unsigned long ct60_blitter, ct60_blitter_load;
-static char has_ct60, ctcm_div=1;
+static char has_ct60;
+static unsigned long ctcm_div=1;
 
 /*--- Functions ---*/
 
