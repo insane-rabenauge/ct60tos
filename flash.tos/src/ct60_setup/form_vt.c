@@ -22,6 +22,7 @@
 #include <mint/osbind.h>
 #include <vt52.h>
 
+#include "config.h"
 #include "form_vt.h"
 #include "misc.h"
 

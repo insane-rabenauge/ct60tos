@@ -25,6 +25,7 @@
 #include <mint/falcon.h>
 #include <mint/sysvars.h>
 
+#include "config.h"
 #include "form_vt.h"
 #include "form_nvram.h"
 #include "misc.h"
@@ -228,11 +229,17 @@ static form_t form_nvram[]={
 	{FORM_TEXT, "Reload NVRAM settings", FORM_X+2,FORM_Y+12},
 	{FORM_TEXT, "Save NVRAM settings", FORM_X+2,FORM_Y+13},
                //012345678901234567890123456789012345678901234567890123456789012345
+#if SETUP_STANDALONE
+	{FORM_TEXT, "", FORM_X+2,0},
+	{FORM_TEXT, "", FORM_X+2,0},
+#endif
 	{FORM_TEXT, "NOTE:", FORM_X+2,0},
 	{FORM_TEXT, "Illegal Video Modes like VGA 640x480xTC can lead to a black screen", FORM_X+2,0},
 	{FORM_TEXT, "unless you have a modified VIDEL clock installed. ", FORM_X+2,0},
+#if !SETUP_STANDALONE
 	{FORM_TEXT, "Should your monitor fail to sync on boot then pressing the ", FORM_X+2,0},
 	{FORM_TEXT, "DELETE key blindly will get you back into the setup program.", FORM_X+2,0},
+#endif
 	{FORM_END, 0,0,0}
 };
 

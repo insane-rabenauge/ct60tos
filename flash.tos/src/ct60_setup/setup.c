@@ -117,9 +117,9 @@ void __main(void)
 	unsigned long cookie_mch=0;
 	getCookie(C__MCH,&cookie_mch);
 	if ((cookie_mch>>16)!=3) {
-	  Cconws("\033ESYSTEM NOT SUPPORTED\r\nPRESS ANY KEY TO QUIT\r\n");
-	  Cnecin();
-	  return;
+		Cconws("\033ESYSTEM NOT SUPPORTED\r\nPRESS ANY KEY TO QUIT\r\n");
+		Cnecin();
+		return;
 	};
 #endif
 
@@ -231,15 +231,16 @@ static void display_banner(void)
 
 	Cconws(CLEAR_DOWN);
 
+	strCopy("CT60 Setup v1.3.0",msg);
+#if !SETUP_STANDALONE
 	if ((basepage[0x80]!=0)&&(basepage[0x81]==27)) { // read tos build date from basepage if run from ct60tos
-	  p=s=0;
-	  while (msg1[s]) msg[p++]=msg1[s++];
-	  l=basepage[0x80]-7; // skip escape sequence
-	  for (i=0;i<l;i++) msg[p++]=basepage[0x83+i];
-	  strCopy(msg2,&msg[p]);
-	} else {
-	  strCopy("CT60 Setup v1.3.0",msg);
+		p=s=0;
+		while (msg1[s]) msg[p++]=msg1[s++];
+		l=basepage[0x80]-7; // skip escape sequence
+		for (i=0;i<l;i++) msg[p++]=basepage[0x83+i];
+		strCopy(msg2,&msg[p]);
 	}
+#endif
 
 	CcenterY(msg,0);
 	CcenterY("(C) 2009 Patrice Mandin, 2019-2026 Daniel Illgen",1);
