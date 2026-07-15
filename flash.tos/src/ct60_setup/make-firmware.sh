@@ -14,3 +14,8 @@ make firmware
 
 sed -i '/^#define SETUP_STANDALONE .*/ s//#define SETUP_STANDALONE 1/' config.h
 make clean
+make
+upx --best --nrv2e --small --small $TOS
+mv setup.tos ../../../setup
+make clean
+

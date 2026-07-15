@@ -57,8 +57,8 @@ setup_loader:
 	addq.l	#2,sp
 
 	swap	d0
-	cmp.b	#SCANCODE_DELETE,d0
-	bne	.nokey
+	cmp.b	#SCANCODE_DELETE,d0	//del pressed?
+	bne	.done		//abort when any other key is pressed
 	moveq	#1,d7
 	bra	.done
 .nokey:
