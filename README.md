@@ -1,6 +1,4 @@
-CT60 boot 1.05 - 20260715 - modified by insane/tSCc
-
-Contact me insane.atari@gmail.com - http://insane.tscc.de
+CT60 boot 1.05 - 20260715 - modified by insane/tSCc - https://insane.tscc.de
 
 Check https://github.com/insane-rabenauge/insaneboot for a nice boot menu!
 
