@@ -86,6 +86,7 @@ static int form_refresh = 1;
 static int setup_state = STATE_MENU;
 static int menu_row = 0;
 int has_ct60 = 0;
+int cpu_cookie=0;
 
 /*--- Functions prototypes ---*/
 
@@ -108,7 +109,7 @@ void forcecachect60()
 	ct60_cache(1);
 };
 
-void debout(long val) { char s; for (s = 28; s >= 0; s -= 4) Cconout("0123456789ABCDEF"[(val >> s) & 0xF]); };
+//void debout(long val) { char s; for (s = 28; s >= 0; s -= 4) Cconout("0123456789ABCDEF"[(val >> s) & 0xF]); };
 
 void __main(void)
 {
@@ -125,6 +126,7 @@ void __main(void)
 
 	unsigned long cookie_ct60;
 	has_ct60 = getCookie(C_CT60, &cookie_ct60);
+
 
 #if CHANGE_VIDEO_MODE
 	video_save();

@@ -22,6 +22,5 @@
 #define SETUP_H 1
 
 extern int has_ct60;
-void debout(long val);
 
 #endif /* SETUP_H */

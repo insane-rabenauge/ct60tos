@@ -2,3 +2,6 @@ obj/
 *.ttp
 gentos
 tos_patches.bin
+send.parcp
+send.sh
+sendparrun.sh
