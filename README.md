@@ -42,7 +42,7 @@ Boot Changelog since v1.03c
 - 20260714: TOS1.03e: Don't clear FPCR register when processing FP exceptions (done by Holger Schulz's 060sp for some reason which got importend into FreeMiNT and from FreeMiNT to CT60 TOS; now it is fixed everywhere)
 - 20260714: TOS1.03e: Fix FPSP bug fetching an immediate single-precision constant: https://atari-forum.com/viewtopic.php?p=467696#p467696
 - 20260714: TOS1.03e: Remove the infamous 5s cache delay code so people can stop wondering why Quake runs at 1 FPS
-- 20260714: Removed the Boot Logo so now TOS doesn't try to detect internal and external video clocks when SuperVidel is present
+- 20260714: Removed the Boot Logo so now TOS doesn't try to detect internal and external video clocks which crashes the system when SuperVidel is present due to SuperVidel hardware bugs
 - 20260714: CT60Setup: removed cache delay completely
 - 20260715: CT60Setup: set lower limit to 66.5mhz on rev 6 board
 - 20260715: CT60Setup: left/right modify the clock speed in 1 MHz steps
