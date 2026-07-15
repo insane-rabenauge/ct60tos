@@ -47,6 +47,7 @@ Boot Changelog since v1.03c
 - 20260715: CT60Setup: set lower limit to 66.5mhz on rev 6 board
 - 20260715: CT60Setup: left/right modify the clock speed in 1 MHz steps
 - 20260715: skip fast ram clear when boot_delay=0
+- 20260715: standalone setup.tos added, "press DEL to enter setup" now skipable by pressing any key OTHER than DEL
 
 Notes:
 - Now the whole supervisor stack is moved into TT RAM so other functions should be faster (e.g. AES) and hopefully more stable (the stack is much bigger now)
