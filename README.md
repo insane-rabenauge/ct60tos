@@ -51,8 +51,8 @@ Boot Changelog since v1.03c
 - 20260715: CT60Setup: left/right modify the clock speed in 1 MHz steps
 
 Notes:
-  Now the whole supervisor stack is moved into TT RAM so other functions should be faster (e.g. AES) and hopefully more stable (the stack is much bigger now)
-  This has one important consequence: you must install 060sp.prg when booting into FreeMiNT / MagiC!
-  FreeMiNT is preconfigured that way by default in recent snapshots but if you have your own mint.cnf, you must add that line there.
-  Even though it seems like a downgrade/regression, what CT60 TOS did was a dirty hack which had to be removed.
+  Now the whole supervisor stack is moved into TT RAM so other functions should be faster (e.g. AES) and hopefully more stable (the stack is much bigger now)  
+  This has one important consequence: you must install 060sp.prg when booting into FreeMiNT / MagiC!  
+  FreeMiNT is preconfigured that way by default in recent snapshots but if you have your own mint.cnf, you must add that line there.  
+  Even though it seems like a downgrade/regression, what CT60 TOS did was a dirty hack which had to be removed.  
 
