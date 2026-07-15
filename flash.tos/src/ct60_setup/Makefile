@@ -29,7 +29,7 @@ HEADERS = ct60_ctcm.h ct60.h asm_procs.h ct60_sdram.h form_boot.h form_cpu.h \
 
 EXTRA_DIST = $(HEADERS) setup_loader.S bin2src.pl
 
-CFLAGS  = -Os -fomit-frame-pointer -Wall -Wno-unused-variable -m68060
+CFLAGS  = -Os -fomit-frame-pointer -Wall -Wno-unused-variable -m68020-60
 ASFLAGS = -m68060
 LDFLAGS = -nostdlib -Wl,--entry -Wl,_init_setup -lgcc
 ## If gcc generates some memcpy calls:
@@ -40,6 +40,7 @@ COBJECTS = $(CSRCS:.c=.o)
 SOBJECTS = $(SSRCS:.S=.o)
 
 DEPEND = .depend
+.PHONY: run send backup
 
 all:	$(TARGET)
 
@@ -69,12 +70,11 @@ $(FIRMWARE_TARGET):	$(TARGET)
 	cp setup_firmware.S $(FIRMWARE_DIR)
 
 run:
-	parrun $(TARGET)
+	hatari $(TARGET)
 
 send:
 	parrun $(TARGET)
 
-.PHONY: backup
 backup:
 	find . -maxdepth 1 -type f -print0 | tar cfz `date +../backup/setup_v%Y%m%d%H%M.tar.gz` --null -T -
 

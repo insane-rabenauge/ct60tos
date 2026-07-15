@@ -25,6 +25,7 @@
 #include <mint/falcon.h>
 #include <mint/cookie.h>
 
+#include "setup.h"
 #include "form_vt.h"
 #include "form_sdram.h"
 #include "misc.h"
@@ -149,9 +150,6 @@ const form_menu_t form_menu_sdram={
 	NULL
 };
 
-static unsigned long cookie_ct60;
-static char has_ct60;
-
 /*--- Functions prototypes ---*/
 
 void initFormSdram(void)
@@ -159,8 +157,6 @@ void initFormSdram(void)
 	unsigned char buffer[128];
 	void *old_stack;
 	int err, i, j, found, week, year;
-
-	has_ct60 = getCookie(C_CT60, &cookie_ct60);
 
 	if (!has_ct60) {
 		return;

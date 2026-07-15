@@ -233,7 +233,6 @@ static form_t form_nvram[]={
 	{FORM_TEXT, "unless you have a modified VIDEL clock installed. ", FORM_X+2,0},
 	{FORM_TEXT, "Should your monitor fail to sync on boot then pressing the ", FORM_X+2,0},
 	{FORM_TEXT, "DELETE key blindly will get you back into the setup program.", FORM_X+2,0},
-
 	{FORM_END, 0,0,0}
 };
 

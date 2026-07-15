@@ -24,6 +24,7 @@
 	.globl	_measure_cpu_frequency_asm
 	.globl	_start_diag_asm
 	.globl	_get_text_max
+	.globl	_getCookie
 
 	.text
 
@@ -85,3 +86,38 @@ _measure_cpu_frequency_asm:                 // return CPU frequency in MHz * 10
 	tst.l D0
 	movem.l (SP)+,D1-D3
 	rts
+
+_getCookie:
+	moveml %d2-%d3/%a2-%a3,%sp@-
+	movel %sp@(20),%d3
+	moveq #0,%d0
+	movel %d0,%sp@-
+	movew #32,%sp@-
+	trap #1			// super visor
+	addql #6,%sp
+	moveal 0x5a0,%a3		// cookie jar
+	movel %d0,%sp@-
+	movew #32,%sp@-
+	trap #1
+	addql #6,%sp
+	cmpaw #0,%a3
+	bnes .jarfound
+	bras .notfound		// no cookie jar
+.checkcookie:
+	cmpl %d0,%d3
+	bnes .nomatch
+	moveal %sp@(24),%a0
+	movel %a3@(4),%a0@
+	moveq #1,%d0
+	bras .done
+.nomatch:
+	addql #8,%a3
+.jarfound:
+	movel %a3@,%d0
+	bnes .checkcookie
+.notfound:
+	moveq #0,%d0
+.done:
+	moveml %sp@+,%d2-%d3/%a2-%a3
+	rts
+

@@ -25,6 +25,7 @@
 #include <mint/falcon.h>
 #include <mint/cookie.h>
 
+#include "setup.h"
 #include "form_vt.h"
 #include "form_ct60.h"
 #include "misc.h"
@@ -73,12 +74,9 @@ const form_menu_t form_menu_ct60={
 
 static void initFormCt60(void)
 {
-	unsigned long cookie_cpu, chip_code, cookie_ct60;
+	unsigned long cookie_cpu, chip_code;
 	void *oldpile;
-	char has_ct60;
 	char c;
-
-	has_ct60 = getCookie(C_CT60, &cookie_ct60);
 
 	if (!has_ct60) {
 		return;

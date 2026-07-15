@@ -73,20 +73,22 @@ static form_t form_exit[]={
 	{FORM_TITLE, "Exit", FORM_X+((FORM_W-4)>>1), FORM_Y},
 #if SETUP_STANDALONE
 	{FORM_TEXT, "Exit to TOS", FORM_X+2,YPOS_CONT},
-#endif
+#else
 	{FORM_TEXT, "Exit and warm reboot", FORM_X+2,YPOS_RESET},
 	{FORM_TEXT, "Exit and cold reboot", FORM_X+2,YPOS_RCOLD},
 	{FORM_TEXT, "Exit to diagnostics", FORM_X+2,YPOS_DIAG},
+#endif
 	{FORM_END, 0,0,0}
 };
 
 form_setting_t form_setting_exit[]={
 #if SETUP_STANDALONE
 	{FORM_X+2,YPOS_CONT , NULL, SETTING_FUNC, 0, exitContinue},
-#endif
+#else
 	{FORM_X+2,YPOS_RESET, NULL, SETTING_FUNC, 0, exitReset},
 	{FORM_X+2,YPOS_RCOLD, NULL, SETTING_FUNC, 0, exitResetCold},
 	{FORM_X+2,YPOS_DIAG , NULL, SETTING_FUNC, 0, exitDiag},
+#endif
 	{0, 0, NULL, SETTING_END}
 };
 
@@ -119,7 +121,7 @@ static void initFormExit(void)
 
 #if SETUP_STANDALONE
 	form_setting_exit[FORM_SETTING_CONTINUE].text = &form_exit[FORM_CONTINUE].text[0];
-#endif
+#else
 	form_setting_exit[FORM_SETTING_RESET].text = &form_exit[FORM_RESET].text[0];
 	form_setting_exit[FORM_SETTING_RCOLD].text = &form_exit[FORM_RCOLD].text[0];
 	form_setting_exit[FORM_SETTING_DIAG].text = &form_exit[FORM_DIAG].text[0];
@@ -128,6 +130,7 @@ static void initFormExit(void)
 	   form_setting_exit[FORM_SETTING_DIAG].text[0]=0;
 	   form_setting_exit[FORM_SETTING_DIAG].input=SETTING_END;
 	};
+#endif
 }
 
 void displayFormExit(void)

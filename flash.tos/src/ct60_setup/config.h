@@ -27,4 +27,9 @@
  */
 #define SETUP_STANDALONE 1
 
+/* Directly set VT52 foreground and background colors
+ * fixes buggy TOS 4 VT52 emulator
+ */
+#define VT52FIX 1
+
 #endif /* CONFIG_H */

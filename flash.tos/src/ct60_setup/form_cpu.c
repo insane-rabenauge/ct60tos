@@ -25,6 +25,7 @@
 #include <mint/falcon.h>
 #include <mint/cookie.h>
 
+#include "setup.h"
 #include "config.h"
 #include "form_vt.h"
 #include "form_cpu.h"
@@ -131,10 +132,8 @@ const form_menu_t form_menu_cpu={
 
 static unsigned long start_tick, cur_tick;
 static unsigned long frequency = 0, min_freq = 0, max_freq = 0;
-static unsigned long cookie_ct60;
 static unsigned long ct60_cpu_fpu, ct60_cpu_fpu_load;
 static unsigned long ct60_blitter, ct60_blitter_load;
-static char has_ct60;
 static unsigned long ctcm_div=1;
 
 /*--- Functions ---*/
@@ -233,8 +232,6 @@ void initFormCpu(void)
 				break;
 		}
 	}
-
-	has_ct60 = getCookie(C_CT60, &cookie_ct60);
 
 	if (has_ct60) {
 		/* CT60 frequency */

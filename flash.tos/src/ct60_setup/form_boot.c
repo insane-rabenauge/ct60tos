@@ -26,6 +26,7 @@
 #include <mint/falcon.h>
 #include <mint/cookie.h>
 
+#include "setup.h"
 #include "form_vt.h"
 #include "form_boot.h"
 #include "misc.h"
@@ -148,15 +149,10 @@ void displayFormBoot(void)
 
 static void reloadFromBoot(void)
 {
-	unsigned long cookie_ct60;
-	char has_ct60;
-
 	boot_devs = 0;
 	boot_log = 1;
 	boot_tos = 1;
 	boot_ctpci = 0;
-
-	has_ct60 = getCookie(C_CT60, &cookie_ct60);
 
 	if (!has_ct60) {
 		return;
@@ -172,11 +168,6 @@ static void reloadFromBoot(void)
 
 static void saveToBoot(void)
 {
-	unsigned long cookie_ct60;
-	char has_ct60;
-
-	has_ct60 = getCookie(C_CT60, &cookie_ct60);
-
 	if (!has_ct60) {
 		return;
 	}

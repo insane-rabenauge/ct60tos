@@ -31,6 +31,9 @@
 
 /*--- Variables ---*/
 
+char* v_col_fg;
+char* v_col_bg;
+
 int vt_height;
 static char vt_input[INPUT_BUF_LEN];
 static char vtStr[5];
@@ -55,20 +58,28 @@ void vt_setCursorPos(int x,int y)
 
 void vt_setBgColor(int col)
 {
+#if VT52FIX
+	*v_col_bg=col;
+#else
 	vtStr[0]=27;
 	vtStr[1]='c';
 	vtStr[2]=col;
 	vtStr[3]=0;
 	Cconws(vtStr);
+#endif
 }
 
 void vt_setFgColor(int col)
 {
+#if VT52FIX
+	*v_col_fg=col;
+#else
 	vtStr[0]=27;
 	vtStr[1]='b';
 	vtStr[2]=col;
 	vtStr[3]=0;
 	Cconws(vtStr);
+#endif
 }
 
 const char *vt_readString(void)

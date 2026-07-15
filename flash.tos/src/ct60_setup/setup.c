@@ -85,6 +85,7 @@ static int menu_refresh = 1;
 static int form_refresh = 1;
 static int setup_state = STATE_MENU;
 static int menu_row = 0;
+int has_ct60 = 0;
 
 /*--- Functions prototypes ---*/
 
@@ -101,23 +102,29 @@ char *basepage;
 /*--- Functions ---*/
 void forcecachect60()
 {
-	unsigned long cookie_ct60;
-	char has_ct60;
-
-	has_ct60 = getCookie(C_CT60, &cookie_ct60);
-
 	if (!has_ct60) {
 		return;
 	}
-
 	ct60_cache(1);
 };
+
+void debout(long val) { char s; for (s = 28; s >= 0; s -= 4) Cconout("0123456789ABCDEF"[(val >> s) & 0xF]); };
 
 void __main(void)
 {
 	volatile uint32_t * const sysvars = (uint32_t *)0x400;
-	/* TODO: Check CT6X presence */
+#if SETUP_STANDALONE
+	unsigned long cookie_mch=0;
+	getCookie(C__MCH,&cookie_mch);
+	if ((cookie_mch>>16)!=3) {
+	  Cconws("\033ESYSTEM NOT SUPPORTED\r\nPRESS ANY KEY TO QUIT\r\n");
+	  Cnecin();
+	  return;
+	};
+#endif
 
+	unsigned long cookie_ct60;
+	has_ct60 = getCookie(C_CT60, &cookie_ct60);
 
 #if CHANGE_VIDEO_MODE
 	video_save();

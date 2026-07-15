@@ -78,30 +78,6 @@ void format_number_hex(char *str, int value, int num_chars, int prefix)
 	}
 }
 
-int getCookie(unsigned long name, unsigned long *value)
-{
-	unsigned long *pCookie;
-	void *old_stack;
-	
-	old_stack = (void *) Super(0);
-	pCookie = *_p_cookies;
-	Super(old_stack);
-
-	if (pCookie == NULL) {
-		return 0;
-	}
-
-	while (pCookie[0]) {
-		if (pCookie[0] == name) {
-			*value = pCookie[1];
-			return 1;
-		}
-		pCookie += 2;
-	}
-
-	return 0;
-}
-
 unsigned long getTicks(void)
 {
 	void *old_stack = (void *) Super(0);
