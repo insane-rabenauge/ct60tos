@@ -2,7 +2,7 @@ CT60 boot 1.05 - 20260715 - modified by insane/tSCc - https://insane.tscc.de
 
 Check https://github.com/insane-rabenauge/insaneboot for a nice boot menu!
 
-Based upon CT60 boot v1.03c and v1.03e by mikro https://github.com/mikrosk/ct60tos
+Based upon CT60 boot v1.03c and mikro's v1.03e https://github.com/mikrosk/ct60tos
 
 Boot Changelog since v1.03c
 - 201902xx: modified the sources for cross compilation on PC (huge thanks to mikro!)
